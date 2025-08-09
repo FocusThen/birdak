@@ -1,4 +1,9 @@
-local push = require("libs.push")
+push = require("libs.push")
+
+Class = require("libs.class")
+
+require("components.Dak")
+
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
@@ -15,6 +20,8 @@ local GROUND_SCROLL_SPEED = 60
 
 local BACKGROUND_LOOPING_POINT = 413
 
+local dak = Dak()
+
 function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.window.setTitle("Birdak")
@@ -24,24 +31,36 @@ function love.load()
 		fullscreen = false,
 		resizable = true,
 	})
+
+	love.keyboard.keysPressed = {}
 end
 
 function love.update(dt)
 	backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
 	groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % VIRTUAL_WIDTH
+
+	dak:update(dt)
+	love.keyboard.keysPressed = {}
 end
 
 function love.draw()
 	push:start()
 	love.graphics.draw(background, -backgroundScroll, 0)
 	love.graphics.draw(ground, -groundScroll, VIRTUAL_HEIGHT - 16)
+
+	dak:render()
 	push:finish()
 end
 
 function love.keypressed(key)
+	love.keyboard.keysPressed[key] = true
 	if key == "escape" then
 		love.event.quit()
 	end
+end
+
+function love.keyboard.wasPressed(key)
+	return love.keyboard.keysPressed[key]
 end
 
 function love.resize(w, h)
