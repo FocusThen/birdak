@@ -5,7 +5,7 @@ function ScoreState:enter(params)
 end
 
 function ScoreState:update(_)
-	if love.keyboard.wasPressed("enter") or love.keyboard.wasPressed("return") then
+	if love.keyboard.wasPressed("enter") or love.keyboard.wasPressed("return") or love.mouse.wasPressed(1) then
 		gStateMachine:change("play")
 	end
 end
@@ -17,5 +17,5 @@ function ScoreState:render()
 	love.graphics.setFont(mediumFont)
 	love.graphics.printf("Score: " .. tostring(self.score), 0, 100, VIRTUAL_WIDTH, "center")
 
-	love.graphics.printf("Press Enter to Play Again!", 0, 160, VIRTUAL_WIDTH, "center")
+	love.graphics.printf("Press Enter or Click to Play Again!", 0, 160, VIRTUAL_WIDTH, "center")
 end
