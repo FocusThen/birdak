@@ -8,6 +8,7 @@ require("components.PipePair")
 require("components.StateMachine")
 require("states.BaseState")
 require("states.PlayState")
+require("states.CountdownState")
 require("states.ScoreState")
 require("states.TitleScreenState")
 
@@ -38,6 +39,16 @@ function love.load()
 	_G.hugeFont = love.graphics.newFont("assets/font.ttf", 56)
 	love.graphics.setFont(dakFont)
 
+	_G.sounds = {
+		["jump"] = love.audio.newSource("assets/jump.wav", "static"),
+		["explosion"] = love.audio.newSource("assets/explosion.wav", "static"),
+		["hurt"] = love.audio.newSource("assets/hurt.wav", "static"),
+		["score"] = love.audio.newSource("assets/score.wav", "static"),
+		["music"] = love.audio.newSource("assets/marios_way.mp3", "static"),
+	}
+	sounds["music"]:setLooping(true)
+	sounds["music"]:play()
+
 	push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
 		vsync = true,
 		fullscreen = false,
@@ -47,6 +58,9 @@ function love.load()
 	_G.gStateMachine = StateMachine({
 		["title"] = function()
 			return TitleScreenState()
+		end,
+		["countdown"] = function()
+			return CountdownState()
 		end,
 		["play"] = function()
 			return PlayState()

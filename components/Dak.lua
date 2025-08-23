@@ -18,6 +18,7 @@ function Dak:update(dt)
 
 	if love.keyboard.wasPressed("space") then
 		self.dy = -5
+    sounds['jump']:play()
 	end
 
 	self.y = self.y + self.dy
