@@ -71,7 +71,9 @@ function love.load()
 	})
 	_G.gStateMachine:change("title")
 
+  -- initialize input tables
 	love.keyboard.keysPressed = {}
+  love.mouse.buttonsPressed = {}
 end
 
 function love.update(dt)
@@ -80,8 +82,9 @@ function love.update(dt)
 
 	gStateMachine:update(dt)
 
-	-- reset
+	-- reset inputs
 	love.keyboard.keysPressed = {}
+  love.mouse.buttonsPressed = {}
 end
 
 function love.draw()
@@ -95,13 +98,19 @@ function love.draw()
 	push:finish()
 end
 
+function love.mousepressed(x, y, button)
+	love.mouse.buttonsPressed[button] = true
+end
+function love.mouse.wasPressed(button)
+	return love.mouse.buttonsPressed[button]
+end
 function love.keypressed(key)
 	love.keyboard.keysPressed[key] = true
+
 	if key == "escape" then
 		love.event.quit()
 	end
 end
-
 function love.keyboard.wasPressed(key)
 	return love.keyboard.keysPressed[key]
 end
