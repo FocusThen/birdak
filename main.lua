@@ -1,10 +1,14 @@
-push = require("libs.push")
+_G.push = require("libs.push")
 
-Class = require("libs.class")
+_G.Class = require("libs.class")
 
 require("components.Dak")
 require("components.Pipe")
 require("components.PipePair")
+require("components.StateMachine")
+require("states.BaseState")
+require("states.PlayState")
+require("states.TitleScreenState")
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -21,24 +25,33 @@ local BACKGROUND_SCROLL_SPEED = 30
 local GROUND_SCROLL_SPEED = 60
 
 local BACKGROUND_LOOPING_POINT = 413
-
-local dak = Dak()
-
-local pipePairs = {}
-
-local spawnTimer = 0
-
-local lastY = -PIPE_HEIGHT + math.random(80) + 20
+-- local GROUND_LOOPING_POINT = 514
 
 function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.window.setTitle("Birdak")
+
+	_G.smallFont = love.graphics.newFont("assets/font.ttf", 8)
+	_G.mediumFont = love.graphics.newFont("assets/font.ttf", 14)
+	_G.dakFont = love.graphics.newFont("assets/dak.ttf", 28)
+	_G.hugeFont = love.graphics.newFont("assets/font.ttf", 56)
+	love.graphics.setFont(dakFont)
 
 	push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
 		vsync = true,
 		fullscreen = false,
 		resizable = true,
 	})
+
+	_G.gStateMachine = StateMachine({
+		["title"] = function()
+			return TitleScreenState()
+		end,
+		["play"] = function()
+			return PlayState()
+		end,
+	})
+	_G.gStateMachine:change("title")
 
 	love.keyboard.keysPressed = {}
 end
@@ -47,27 +60,7 @@ function love.update(dt)
 	backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
 	groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt) % VIRTUAL_WIDTH
 
-	spawnTimer = spawnTimer + dt
-
-	if spawnTimer > 2 then
-		local y = math.max(-PIPE_HEIGHT + 10, math.min(lastY + math.random(-20, 20), VIRTUAL_HEIGHT - 90 - PIPE_HEIGHT))
-		lastY = y
-
-		table.insert(pipePairs, PipePair(y))
-		spawnTimer = 0
-	end
-
-	dak:update(dt)
-
-	for k, pair in pairs(pipePairs) do
-		pair:update(dt)
-	end
-
-	for k, pair in pairs(pipePairs) do
-		if pair.remove then
-			table.remove(pipePairs, k)
-		end
-	end
+	gStateMachine:update(dt)
 
 	-- reset
 	love.keyboard.keysPressed = {}
@@ -77,13 +70,10 @@ function love.draw()
 	push:start()
 	love.graphics.draw(background, -backgroundScroll, 0)
 
-	for k, pair in pairs(pipePairs) do
-		pair:render()
-	end
+	gStateMachine:render()
 
 	love.graphics.draw(ground, -groundScroll, VIRTUAL_HEIGHT - 16)
 
-	dak:render()
 	push:finish()
 end
 
