@@ -12,6 +12,8 @@ function PlayState:init()
 	self.pipePairs = {}
 	self.timer = 0
 
+	self.score = 0
+
 	self.lastY = -PIPE_HEIGHT + math.random(80) + 20
 end
 
@@ -28,6 +30,13 @@ function PlayState:update(dt)
 	end
 
 	for _, pair in pairs(self.pipePairs) do
+		if not pair.scored then
+			if pair.x + PIPE_WIDTH < self.dak.x then
+				self.score = self.score + 1
+				pair.scored = true
+			end
+		end
+
 		pair:update(dt)
 	end
 
@@ -42,13 +51,17 @@ function PlayState:update(dt)
 	for _, pair in pairs(self.pipePairs) do
 		for _, pipe in pairs(pair.pipes) do
 			if self.dak:collides(pipe) then
-				gStateMachine:change("title")
+				gStateMachine:change("score", {
+					score = self.score,
+				})
 			end
 		end
 	end
 
 	if self.dak.y > VIRTUAL_HEIGHT - 15 then
-		gStateMachine:change("title")
+		gStateMachine:change("score", {
+			score = self.score,
+		})
 	end
 end
 
@@ -56,6 +69,9 @@ function PlayState:render()
 	for _, pair in pairs(self.pipePairs) do
 		pair:render()
 	end
+
+	love.graphics.setFont(dakFont)
+	love.graphics.print("Score: " .. tostring(self.score), 8, 8)
 
 	self.dak:render()
 end
